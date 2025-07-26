@@ -7,9 +7,12 @@ import Journal from '@/models/journal';
 export async function GET() {
   try {
     await connectDB();
+    
+    console.log('🔗 Mongo URI:', process.env.MONGODB_URI);
 
     const db = mongoose.connection.db;
     if (!db) throw new Error('MongoDB connection not established');
+    console.log('📚 Current DB:', db.databaseName);
 
     const collections = await db.listCollections().toArray();
     console.log('📁 Collections:', collections.map(c => c.name));
