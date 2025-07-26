@@ -5,6 +5,8 @@ import Journal from '@/models/journal';
 
 // GET: Lấy 5 bản ghi để test
 export async function GET() {
+  console.log('🧪 API /api/journals was hit');
+
   try {
     await connectDB();
     
