@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '../../../lib/mongodb';
 import mongoose from 'mongoose';
 
 const JournalSchema = new mongoose.Schema({}, { strict: false });
