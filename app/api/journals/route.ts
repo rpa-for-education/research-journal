@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import Journal from '@/models/journal';
 
-// GET: Lấy 5 bản ghi để test
+// GET: Lấy tất cả bản ghi journals
 export async function GET() {
   console.log('🧪 API /api/journals was hit');
 
@@ -21,12 +21,11 @@ export async function GET() {
     console.log('📁 Collections:', collections.map(c => c.name));
 
     const rawJournals = await db
-      .collection('journal') // viết đúng tên collection
+      .collection('journal') // tên collection là 'journal'
       .find({})
-      .limit(5)
       .toArray();
 
-    console.log('✅ Sample data from raw query:', rawJournals);
+    console.log(`✅ Fetched ${rawJournals.length} journals`);
 
     return NextResponse.json(rawJournals);
   } catch (error) {
@@ -43,7 +42,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log('📥 POST Body:', body);
 
+    // Optional: validate body before create
     const newJournal = await Journal.create(body);
+
+    console.log('✅ Journal created:', newJournal);
 
     return NextResponse.json(newJournal, { status: 201 });
   } catch (error) {
