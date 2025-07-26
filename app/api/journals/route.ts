@@ -1,24 +1,30 @@
-import { NextResponse } from 'next/server';
+// app/api/journals/route.ts
+
 import { connectDB } from '@/lib/mongodb';
-import mongoose from 'mongoose';
+import Journal from '@/models/journal';
+import { NextResponse } from 'next/server';
 
-const JournalSchema = new mongoose.Schema({}, { strict: false });
-const Journal = mongoose.models.Journal || mongoose.model('Journal', JournalSchema);
-
+// GET: Lấy toàn bộ journal
 export async function GET() {
   try {
-    const db = await connectDB();
-    const journals = await db.collection('journal').find({}).toArray();
+    await connectDB();
+    const journals = await Journal.find({});
     return NextResponse.json(journals);
-  } catch (err) {
-    console.error('GET journals error:', err);
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+  } catch (error) {
+    console.error('Error fetching journals:', error);
+    return NextResponse.json({ error: 'Failed to fetch journals' }, { status: 500 });
   }
 }
 
+// POST: Thêm mới một journal
 export async function POST(req: Request) {
-  await connectDB();
-  const body = await req.json();
-  const journal = await Journal.create(body);
-  return NextResponse.json(journal, { status: 201 });
+  try {
+    await connectDB();
+    const body = await req.json();
+    const newJournal = await Journal.create(body);
+    return NextResponse.json(newJournal, { status: 201 });
+  } catch (error) {
+    console.error('Error creating journal:', error);
+    return NextResponse.json({ error: 'Failed to create journal' }, { status: 500 });
+  }
 }
