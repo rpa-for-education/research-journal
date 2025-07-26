@@ -6,8 +6,6 @@ const JournalSchema = new mongoose.Schema({
   SJR: Number,
   Citations: Number,
   Country: String,
-}, {
-  collection: 'journal', // ép dùng đúng tên collection
 });
 
 export default mongoose.models.Journal || mongoose.model('Journal', JournalSchema);
