@@ -1,20 +1,26 @@
-// app/api/journals/route.ts
-
 import { connectDB } from '@/lib/mongodb';
-import Journal from '@/models/journal';
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 
-// GET: Lấy toàn bộ journal
 export async function GET() {
   try {
     await connectDB();
-    const journals = await Journal.find({});
-    return NextResponse.json(journals);
+
+    const rawJournals = await mongoose.connection.db
+      .collection('journal')  // ⚠️ viết đúng tên collection
+      .find({})
+      .limit(5)                // chỉ lấy 5 bản ghi để test
+      .toArray();
+
+    console.log('✅ Sample data from raw query:', rawJournals);
+
+    return NextResponse.json(rawJournals);
   } catch (error) {
-    console.error('Error fetching journals:', error);
+    console.error('❌ Error (raw query):', error);
     return NextResponse.json({ error: 'Failed to fetch journals' }, { status: 500 });
   }
 }
+
 
 // POST: Thêm mới một journal
 export async function POST(req: Request) {
