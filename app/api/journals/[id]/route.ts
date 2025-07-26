@@ -1,26 +1,27 @@
-// app/api/journals/[id]/route.ts
 import { connectDB } from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import Journal from '@/models/journal';
+import { Types } from 'mongoose';
 
 export async function PUT(request: NextRequest) {
   try {
     await connectDB();
-
+    
     const url = new URL(request.url);
-    const id = url.pathname.split('/').pop(); // lấy id từ /journals/[id]
-    const body = await request.json();
+    const id = url.pathname.split('/').pop(); // lấy ID từ URL
 
-    const updated = await Journal.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
-    });
+    if (!id || !Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const updated = await Journal.findByIdAndUpdate(id, body, { new: true });
 
     if (!updated) {
       return NextResponse.json({ error: 'Journal not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Updated successfully', data: updated });
+    return NextResponse.json({ message: `Updated journal ${id}`, data: updated });
   } catch (error) {
     console.error('❌ PUT error:', error);
     return NextResponse.json({ error: 'Failed to update journal' }, { status: 500 });
@@ -32,7 +33,11 @@ export async function DELETE(request: NextRequest) {
     await connectDB();
 
     const url = new URL(request.url);
-    const id = url.pathname.split('/').pop(); // lấy id từ /journals/[id]
+    const id = url.pathname.split('/').pop();
+
+    if (!id || !Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
 
     const deleted = await Journal.findByIdAndDelete(id);
 
