@@ -1,52 +1,53 @@
+// Dùng cho Next.js App Router API routes
 export const runtime = 'nodejs';
 
 import { connectDB } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
-// GET: Lấy tất cả journals
+// GET: Lấy danh sách journals
 export async function GET() {
-  console.log('📥 API GET /api/journals hit');
-  
   try {
     await connectDB();
 
-    const db = mongoose.connection.db;
-
-    if (!db) {
-      console.error('❌ No MongoDB connection');
-      return NextResponse.json({ error: 'Database not connected' }, { status: 500 });
+    // Kiểm tra kết nối
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('MongoDB not connected');
     }
 
-    // Ghi log thông tin DB
-    console.log('🔗 DB name:', db.databaseName);
+    const db = mongoose.connection.db;
+    if (!db) throw new Error('MongoDB database is undefined');
 
-    const data = await db.collection('journals').find({}).toArray();
+    const journals = await db.collection('journals').find({}).toArray(); // nếu collection tên 'journal', sửa lại
+    console.log(`✅ GET: Fetched ${journals.length} journals`);
 
-    console.log(`✅ ${data.length} journals fetched`);
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('❌ GET error:', error);
+    return NextResponse.json(journals);
+  } catch (err) {
+    console.error('❌ GET error:', err);
     return NextResponse.json({ error: 'Failed to fetch journals' }, { status: 500 });
   }
 }
 
-// POST: Tạo mới journal
+// POST: Thêm một journal mới
 export async function POST(req: Request) {
-  console.log('📥 API POST /api/journals hit');
-
   try {
     await connectDB();
-    const body = await req.json();
+
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('MongoDB not connected');
+    }
 
     const db = mongoose.connection.db;
+    if (!db) throw new Error('MongoDB database is undefined');
+
+    const body = await req.json();
     const result = await db.collection('journals').insertOne(body);
 
-    console.log('✅ Journal inserted:', result.insertedId);
+    console.log('✅ POST: Inserted journal with ID', result.insertedId);
 
     return NextResponse.json({ _id: result.insertedId, ...body }, { status: 201 });
-  } catch (error) {
-    console.error('❌ POST error:', error);
+  } catch (err) {
+    console.error('❌ POST error:', err);
     return NextResponse.json({ error: 'Failed to create journal' }, { status: 500 });
   }
 }
