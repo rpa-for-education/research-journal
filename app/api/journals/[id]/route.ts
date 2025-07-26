@@ -1,32 +1,43 @@
 import { connectDB } from '@/lib/mongodb';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Journal from '@/models/journal';
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+// ✅ PUT: Cập nhật journal theo id
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await connectDB();
 
-    const id = context.params.id;
-    const body = await req.json();
+    const { id } = context.params;
+    const data = await req.json();
 
-    const updatedJournal = await Journal.findByIdAndUpdate(id, body, { new: true });
+    const updated = await Journal.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
 
-    if (!updatedJournal) {
+    if (!updated) {
       return NextResponse.json({ error: 'Journal not found' }, { status: 404 });
     }
 
-    return NextResponse.json(updatedJournal);
+    return NextResponse.json({ message: 'Updated successfully', data: updated });
   } catch (error) {
     console.error('❌ PUT error:', error);
     return NextResponse.json({ error: 'Failed to update journal' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+// ✅ DELETE: Xoá journal theo id
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await connectDB();
 
-    const id = context.params.id;
+    const { id } = context.params;
 
     const deleted = await Journal.findByIdAndDelete(id);
 
