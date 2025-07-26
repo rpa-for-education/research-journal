@@ -1,19 +1,17 @@
+// app/api/journals/[id]/route.ts
 import { connectDB } from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
 import Journal from '@/models/journal';
 
-// ✅ PUT: Cập nhật journal theo id
-export async function PUT(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
     await connectDB();
 
-    const { id } = context.params;
-    const data = await req.json();
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop(); // lấy id từ /journals/[id]
+    const body = await request.json();
 
-    const updated = await Journal.findByIdAndUpdate(id, data, {
+    const updated = await Journal.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -29,15 +27,12 @@ export async function PUT(
   }
 }
 
-// ✅ DELETE: Xoá journal theo id
-export async function DELETE(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
     await connectDB();
 
-    const { id } = context.params;
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop(); // lấy id từ /journals/[id]
 
     const deleted = await Journal.findByIdAndDelete(id);
 
